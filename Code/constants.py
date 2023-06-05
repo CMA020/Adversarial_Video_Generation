@@ -52,7 +52,7 @@ def get_test_frame_dims():
 
 def get_train_frame_dims():
     img_path = glob(os.path.join(TRAIN_DIR, '*/*'))[0]
-    img = imread(img_path, mode='RGB')
+    img = imageio.imread(img_path, mode='RGB')
     shape = np.shape(img)
 
     return shape[0], shape[1]
@@ -69,7 +69,7 @@ def set_test_dir(directory):
     FULL_HEIGHT, FULL_WIDTH = get_test_frame_dims()
 
 # root directory for all data
-#DATA_DIR = get_dir('../Data/')
+DATA_DIR = get_dir('../Data/')
 # directory of unprocessed training frames
 #TRAIN_DIR = os.path.join(DATA_DIR, 'Ms_Pacman/Train/')
 # TRAIN_DIR = '~/Adversarial_Video_Generation/Train'
@@ -77,7 +77,7 @@ def set_test_dir(directory):
 # TEST_DIR ='~/Adversarial_Video_Generation/Test'
 # Directory of processed training clips.
 # hidden so finder doesn't freeze w/ so many files. DON'T USE `ls` COMMAND ON THIS DIR!
-#TRAIN_DIR_CLIPS = get_dir(os.path.join(DATA_DIR, '.Clips/'))
+TRAIN_DIR_CLIPS = get_dir(os.path.join(DATA_DIR, '.Clips/'))
 # TRAIN_DIR_CLIPS = '~/Adversarial_Video_Generation/Saved'
 
 # For processing clips. l2 diff between frames must be greater than this
