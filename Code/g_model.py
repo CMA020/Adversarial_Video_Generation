@@ -1,10 +1,10 @@
 import tensorflow as tf
 import numpy as np
-from scipy.misc import imsave
+#from scipy.misc import imsave
 from skimage.transform import resize
 from copy import deepcopy
 import os
-
+import imagieo
 import constants as c
 from loss_functions import combined_loss
 from utils import psnr_error, sharp_diff_error
@@ -324,7 +324,7 @@ class GeneratorModel:
                 # save input images
                 for frame_num in range(c.HIST_LEN):
                     img = input_frames[pred_num, :, :, (frame_num * 3):((frame_num + 1) * 3)]
-                    imsave(os.path.join(pred_dir, 'input_' + str(frame_num) + '.png'), img)
+                    imageio.imwrite(os.path.join(pred_dir, 'input_' + str(frame_num) + '.png'), img)
 
                 # save preds and gts at each scale
                 # noinspection PyUnboundLocalVariable
@@ -334,8 +334,8 @@ class GeneratorModel:
                     path = os.path.join(pred_dir, 'scale' + str(scale_num))
                     gt_img = scale_gts[scale_num][pred_num]
 
-                    imsave(path + '_gen.png', gen_img)
-                    imsave(path + '_gt.png', gt_img)
+                    imageio.imwrite(path + '_gen.png', gen_img)
+                    imageio.imwrite(path + '_gt.png', gt_img)
 
             print('Saved images!')
             print('-' * 30)
@@ -416,13 +416,13 @@ class GeneratorModel:
                 # save input images
                 for frame_num in range(c.HIST_LEN):
                     img = input_frames[pred_num, :, :, (frame_num * 3):((frame_num + 1) * 3)]
-                    imsave(os.path.join(pred_dir, 'input_' + str(frame_num) + '.png'), img)
+                    imageio.imwrite(os.path.join(pred_dir, 'input_' + str(frame_num) + '.png'), img)
 
                 # save recursive outputs
                 for rec_num in range(num_rec_out):
                     gen_img = rec_preds[rec_num][pred_num]
                     gt_img = gt_frames[pred_num, :, :, 3 * rec_num:3 * (rec_num + 1)]
-                    imsave(os.path.join(pred_dir, 'gen_' + str(rec_num) + '.png'), gen_img)
-                    imsave(os.path.join(pred_dir, 'gt_' + str(rec_num) + '.png'), gt_img)
+                    imageio.imwrite(os.path.join(pred_dir, 'gen_' + str(rec_num) + '.png'), gen_img)
+                    imageio.imwrite(os.path.join(pred_dir, 'gt_' + str(rec_num) + '.png'), gt_img)
 
         print('-' * 30)
