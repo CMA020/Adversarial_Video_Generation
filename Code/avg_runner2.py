@@ -7,43 +7,7 @@ from utils import get_train_batch, get_test_batch
 import constants as c
 from g_model import GeneratorModel
 from d_model import DiscriminatorModel
-HIST_LEN = 3
-SCALE_FMS_G = [[3 * HIST_LEN, 128, 256, 128, 3],
-               [3 * (HIST_LEN + 1), 128, 256, 128, 3],
-               [3 * (HIST_LEN + 1), 128, 256, 512, 256, 128, 3],
-               [3 * (HIST_LEN + 1), 128, 256, 512, 256, 128, 3]]
 
-
-SCALE_KERNEL_SIZES_G = [[3, 3, 3, 3],
-                        [5, 3, 3, 5],
-                        [5, 3, 3, 3, 3, 5],
-                        [7, 5, 5, 5, 5, 7]]
-
-
-##
-# Discriminator model
-##
-
-# learning rate for the discriminator model
-LRATE_D = 0.02
-# padding for convolutions in the discriminator model
-PADDING_D = 'VALID'
-# feature maps for each convolution of each scale network in the discriminator model
-SCALE_CONV_FMS_D = [[3, 64],
-                    [3, 64, 128, 128],
-                    [3, 128, 256, 256],
-                    [3, 128, 256, 512, 128]]
-# kernel sizes for each convolution of each scale network in the discriminator model
-SCALE_KERNEL_SIZES_D = [[3],
-                        [3, 3, 3],
-                        [5, 5, 5],
-                        [7, 7, 5, 5]]
-# layer sizes for each fully-connected layer of each scale network in the discriminator model
-# layer connecting conv to fully-connected is dynamically generated when creating the model
-SCALE_FC_LAYER_SIZES_D = [[512, 256, 1],
-                          [1024, 512, 1],
-                          [1024, 512, 1],
-                          [1024, 512, 1]]
 
 class AVGRunner:
     def __init__(self, num_steps, model_load_path, num_test_rec):
@@ -58,38 +22,48 @@ class AVGRunner:
                              the future.
         """
 
-        self.global_step = 0
+        self.global_step = tf.Variable(0, dtype=tf.int32)
         self.num_steps = num_steps
         self.num_test_rec = num_test_rec
 
-        #self.sess = tf.Session()
-        #self.summary_writer = tf.train.SummaryWriter(c.SUMMARY_SAVE_DIR, graph=self.sess.graph)
+        self.summary_writer = tf.summary.create_file_writer(c.SUMMARY_SAVE_DIR)
 
         if c.ADVERSARIAL:
             print('Init discriminator...')
             self.d_model = DiscriminatorModel(
-                                              c.TRAIN_HEIGHT,
-                                              c.TRAIN_WIDTH,
-                                              c.SCALE_CONV_FMS_D,
-                                              c.SCALE_KERNEL_SIZES_D,
-                                              c.SCALE_FC_LAYER_SIZES_D)
+                c.TRAIN_HEIGHT,
+                c.TRAIN_WIDTH,
+                c.SCALE_CONV_FMS_D,
+                c.SCALE_KERNEL_SIZES_D,
+                c.SCALE_FC_LAYER_SIZES_D
+            )
 
         print('Init generator...')
         self.g_model = GeneratorModel(
-                                      c.TRAIN_HEIGHT,
-                                      c.TRAIN_WIDTH,
-                                      c.FULL_HEIGHT,
-                                      c.FULL_WIDTH,
-                                      c.SCALE_FMS_G,
-                                      c.SCALE_KERNEL_SIZES_G)
+            c.TRAIN_HEIGHT,
+            c.TRAIN_WIDTH,
+            c.FULL_HEIGHT,
+            c.FULL_WIDTH,
+            c.SCALE_FMS_G,
+            c.SCALE_KERNEL_SIZES_G
+        )
 
         print('Init variables...')
-        self.saver = tf.train.Saver(keep_checkpoint_every_n_hours=2)
-        #self.sess.run(tf.global_variables_initializer())
+        self.saver = tf.train.Checkpoint(
+            generator=self.g_model,
+            discriminator=self.d_model if c.ADVERSARIAL else None,
+            global_step=self.global_step
+        )
+        self.manager = tf.train.CheckpointManager(
+            self.saver,
+            c.MODEL_SAVE_DIR,
+            max_to_keep=5,
+            checkpoint_name="model.ckpt"
+        )
 
         # if load path specified, load a saved model
         if model_load_path is not None:
-            #self.saver.restore(self.sess, model_load_path)
+            self.saver.restore(model_load_path)
             print('Model restored from ' + model_load_path)
 
     def train(self):
@@ -106,16 +80,15 @@ class AVGRunner:
             # update generator
             batch = get_train_batch()
             print('Training generator...')
-            self.global_step = self.g_model.train_step(
+            self.global_step.assign_add(1)
+            self.g_model.train_step(
                 batch, discriminator=(self.d_model if c.ADVERSARIAL else None))
 
             # save the models
             if self.global_step % c.MODEL_SAVE_FREQ == 0:
                 print('-' * 30)
                 print('Saving models...')
-                # #self.saver.save(self.sess,
-                #                 c.MODEL_SAVE_DIR + 'model.ckpt',
-                #                 global_step=self.global_step)
+                self.manager.save(checkpoint_number=self.global_step)
                 print('Saved models!')
                 print('-' * 30)
 
@@ -171,7 +144,7 @@ def main():
 
     for opt, arg in opts:
         if opt in ('-l', '--load_path'):
-            load_path = arg
+            load_path = tf.train.latest_checkpoint(arg)
         if opt in ('-t', '--test_dir'):
             c.set_test_dir(arg)
         if opt in ('-r', '--recursions'):

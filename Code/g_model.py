@@ -4,7 +4,7 @@ import numpy as np
 from skimage.transform import resize
 from copy import deepcopy
 import os
-import imagieo
+import imageio
 import constants as c
 from loss_functions import combined_loss
 from utils import psnr_error, sharp_diff_error

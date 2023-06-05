@@ -145,7 +145,7 @@ ADVERSARIAL = True
 # the training minibatch size
 BATCH_SIZE = 8
 # the number of history frames to give as input to the network
-HIST_LEN = 4
+HIST_LEN = 3
 
 ##
 # Loss parameters
