@@ -86,8 +86,8 @@ MOVEMENT_THRESHOLD = 100
 NUM_CLIPS = len(glob(TRAIN_DIR_CLIPS + '*'))
 
 # the height and width of the full frames to test on. Set in avg_runner.py or process_data.py main.
-FULL_HEIGHT = 210
-FULL_WIDTH = 160
+FULL_HEIGHT = 3264
+FULL_WIDTH = 1470
 # the height and width of the patches to train on
 TRAIN_HEIGHT = TRAIN_WIDTH = 32
 

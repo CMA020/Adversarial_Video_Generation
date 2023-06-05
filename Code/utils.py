@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-#from scipy.ndimage import imread
+import scipy.ndimage
 import imageio
 from glob import glob
 import os
@@ -85,6 +85,8 @@ def get_full_clips(data_dir, num_clips, num_rec_out=1):
         # read in frames
         for frame_num, frame_path in enumerate(clip_frame_paths):
             frame = imageio.imread(frame_path, mode='RGB')
+            frame = scipy.ndimage.zoom(frame, (c.FULL_HEIGHT / frame.shape[0], c.FULL_WIDTH / frame.shape[1], 1),
+                                       order=1)
             norm_frame = normalize_frames(frame)
 
             clips[clip_num, :, :, frame_num * 3:(frame_num + 1) * 3] = norm_frame
