@@ -1,6 +1,8 @@
 import tensorflow as tf
 from tfutils import w, b, conv_out_size
 import constants as c
+import tensorflow.compat.v1 as tf1
+tf1.disable_v2_behavior()
 
 
 # noinspection PyShadowingNames
@@ -52,7 +54,7 @@ class DScaleModel:
         # Input data
         ##
         with tf.name_scope('input'):
-            self.input_frames = tf.placeholder(
+            self.input_frames = tf1.placeholder(
                 tf.float32, shape=[None, self.height, self.width, self.conv_layer_fms[0]])
 
             # use variable batch_size for more flexibility
@@ -91,8 +93,8 @@ class DScaleModel:
                 fc_ws = []
                 fc_bs = []
                 for i in range(len(self.fc_layer_sizes) - 1):
-                    fc_ws.append(w([self.fc_layer_sizes[i],
-                                    self.fc_layer_sizes[i + 1]]))
+                    fc_ws.append(w([int(self.fc_layer_sizes[i]),
+                                    int(self.fc_layer_sizes[i + 1])]))
                     fc_bs.append(b([self.fc_layer_sizes[i + 1]]))
 
         ##

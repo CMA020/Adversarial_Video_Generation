@@ -1,7 +1,10 @@
 import tensorflow as tf
 import numpy as np
 from skimage.transform import resize
+import tensorflow.compat.v1 as tf1
+tf1.disable_v2_behavior()
 
+import g_model as g
 from d_scale_model import DScaleModel
 from loss_functions import adv_loss
 import constants as c
@@ -41,7 +44,7 @@ class DiscriminatorModel:
         self.scale_fc_layer_sizes = scale_fc_layer_sizes
         self.num_scale_nets = len(scale_conv_layer_fms)
 
-        self.define_graph()
+        #self.define_graph()
 
     # noinspection PyAttributeOutsideInit
     def define_graph(self):
@@ -73,7 +76,7 @@ class DiscriminatorModel:
             # Data
             ##
 
-            self.labels = tf.placeholder(tf.float32, shape=[None, 1], name='labels')
+            self.labels = tf1.placeholder(tf.float32, shape=[None, 1], name='labels')
 
             ##
             # Training
@@ -83,7 +86,7 @@ class DiscriminatorModel:
                 # global loss is the combined loss from every scale network
                 self.global_loss = adv_loss(self.scale_preds, self.labels)
                 self.global_step = tf.Variable(0, trainable=False, name='global_step')
-                self.optimizer = tf.train.GradientDescentOptimizer(c.LRATE_D, name='optimizer')
+                self.optimizer = tf.optimizers.SGD(c.LRATE_D, name='optimizer')
                 self.train_op = self.optimizer.minimize(self.global_loss,
                                                         global_step=self.global_step,
                                                         name='train_op')
@@ -113,8 +116,11 @@ class DiscriminatorModel:
         # Get generated frames from GeneratorModel
         ##
 
+        # Access input_frames_train
+      
         g_feed_dict = {generator.input_frames_train: input_frames,
                        generator.gt_frames_train: gt_output_frames}
+
         g_scale_preds = self.sess.run(generator.scale_preds_train, feed_dict=g_feed_dict)
 
         ##

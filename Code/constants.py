@@ -77,8 +77,9 @@ DATA_DIR = get_dir('../Data/')
 # TEST_DIR ='~/Adversarial_Video_Generation/Test'
 # Directory of processed training clips.
 # hidden so finder doesn't freeze w/ so many files. DON'T USE `ls` COMMAND ON THIS DIR!
-TRAIN_DIR_CLIPS = get_dir(os.path.join(DATA_DIR, '.Clips/'))
-# TRAIN_DIR_CLIPS = '~/Adversarial_Video_Generation/Saved'
+#TRAIN_DIR_CLIPS = get_dir(os.path.join(DATA_DIR, '.Clips/'))
+#TRAIN_DIR_CLIPS = get_dir('~/Adversarial_Video_Generation/Saved')
+TRAIN_DIR_CLIPS = os.path.expanduser('~/Adversarial_Video_Generation/Saved/Saved')
 
 # For processing clips. l2 diff between frames must be greater than this
 MOVEMENT_THRESHOLD = 100

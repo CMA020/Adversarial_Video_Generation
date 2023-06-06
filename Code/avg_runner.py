@@ -2,48 +2,14 @@ import tensorflow as tf
 import getopt
 import sys
 import os
+import tensorflow.compat.v1 as tf1
+tf1.disable_v2_behavior()
+
 
 from utils import get_train_batch, get_test_batch
 import constants as c
 from g_model import GeneratorModel
 from d_model import DiscriminatorModel
-HIST_LEN = 3
-SCALE_FMS_G = [[3 * HIST_LEN, 128, 256, 128, 3],
-               [3 * (HIST_LEN + 1), 128, 256, 128, 3],
-               [3 * (HIST_LEN + 1), 128, 256, 512, 256, 128, 3],
-               [3 * (HIST_LEN + 1), 128, 256, 512, 256, 128, 3]]
-
-
-SCALE_KERNEL_SIZES_G = [[3, 3, 3, 3],
-                        [5, 3, 3, 5],
-                        [5, 3, 3, 3, 3, 5],
-                        [7, 5, 5, 5, 5, 7]]
-
-
-##
-# Discriminator model
-##
-
-# learning rate for the discriminator model
-LRATE_D = 0.02
-# padding for convolutions in the discriminator model
-PADDING_D = 'VALID'
-# feature maps for each convolution of each scale network in the discriminator model
-SCALE_CONV_FMS_D = [[3, 64],
-                    [3, 64, 128, 128],
-                    [3, 128, 256, 256],
-                    [3, 128, 256, 512, 128]]
-# kernel sizes for each convolution of each scale network in the discriminator model
-SCALE_KERNEL_SIZES_D = [[3],
-                        [3, 3, 3],
-                        [5, 5, 5],
-                        [7, 7, 5, 5]]
-# layer sizes for each fully-connected layer of each scale network in the discriminator model
-# layer connecting conv to fully-connected is dynamically generated when creating the model
-SCALE_FC_LAYER_SIZES_D = [[512, 256, 1],
-                          [1024, 512, 1],
-                          [1024, 512, 1],
-                          [1024, 512, 1]]
 
 class AVGRunner:
     def __init__(self, num_steps, model_load_path, num_test_rec):
@@ -62,12 +28,14 @@ class AVGRunner:
         self.num_steps = num_steps
         self.num_test_rec = num_test_rec
 
-        #self.sess = tf.Session()
-        #self.summary_writer = tf.train.SummaryWriter(c.SUMMARY_SAVE_DIR, graph=self.sess.graph)
+        self.sess = tf.compat.v1.Session()
+        # self.summary_writer = tf.summary.create_file_writer(c.SUMMARY_SAVE_DIR, graph=self.sess.graph)
+        self.summary_writer = tf.summary.create_file_writer(c.SUMMARY_SAVE_DIR)
 
         if c.ADVERSARIAL:
             print('Init discriminator...')
-            self.d_model = DiscriminatorModel(
+            self.d_model = DiscriminatorModel(self.sess,
+                                              self.summary_writer,
                                               c.TRAIN_HEIGHT,
                                               c.TRAIN_WIDTH,
                                               c.SCALE_CONV_FMS_D,
@@ -75,7 +43,8 @@ class AVGRunner:
                                               c.SCALE_FC_LAYER_SIZES_D)
 
         print('Init generator...')
-        self.g_model = GeneratorModel(
+        self.g_model = GeneratorModel(self.sess,
+                                      self.summary_writer,
                                       c.TRAIN_HEIGHT,
                                       c.TRAIN_WIDTH,
                                       c.FULL_HEIGHT,
@@ -84,8 +53,10 @@ class AVGRunner:
                                       c.SCALE_KERNEL_SIZES_G)
 
         print('Init variables...')
-        self.saver = tf.train.Saver(keep_checkpoint_every_n_hours=2)
-        #self.sess.run(tf.global_variables_initializer())
+        keep_checkpoint_every_n_hours = tf.Variable(2, dtype=tf.int64)
+        self.saver = tf.train.Checkpoint(keep_checkpoint_every_n_hours=keep_checkpoint_every_n_hours)
+
+        self.sess.run(tf1.global_variables_initializer())
 
         # if load path specified, load a saved model
         if model_load_path is not None:

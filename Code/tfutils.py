@@ -1,5 +1,7 @@
 import tensorflow as tf
 import numpy as np
+import tensorflow.compat.v1 as tf1
+tf1.disable_v2_behavior()
 
 
 def w(shape, stddev=0.01):
@@ -7,7 +9,7 @@ def w(shape, stddev=0.01):
     @return A weight layer with the given shape and standard deviation. Initialized with a
             truncated normal distribution.
     """
-    return tf.Variable(tf.truncated_normal(shape, stddev=stddev))
+    return tf.Variable(tf1.truncated_normal(shape, stddev=stddev))
 
 
 def b(shape, const=0.1):
@@ -53,8 +55,8 @@ def log10(t):
     @return: A tensor with the base-10 log of each element in t.
     """
 
-    numerator = tf.log(t)
-    denominator = tf.log(tf.constant(10, dtype=numerator.dtype))
+    numerator = tf1.log(t)
+    denominator = tf1.log(tf.constant(10, dtype=numerator.dtype))
     return numerator / denominator
 
 
