@@ -74,7 +74,7 @@ DATA_DIR = get_dir('../Data/')
 #TRAIN_DIR = os.path.join(DATA_DIR, 'Ms_Pacman/Train/')
 # TRAIN_DIR = '~/Adversarial_Video_Generation/Train'
 # directory of unprocessed test frames
-# TEST_DIR ='~/Adversarial_Video_Generation/Test'
+TEST_DIR =os.path.expanduser('~/Adversarial_Video_Generation/Data/Test')
 # Directory of processed training clips.
 # hidden so finder doesn't freeze w/ so many files. DON'T USE `ls` COMMAND ON THIS DIR!
 #TRAIN_DIR_CLIPS = get_dir(os.path.join(DATA_DIR, '.Clips/'))

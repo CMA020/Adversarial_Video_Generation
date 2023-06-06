@@ -117,9 +117,9 @@ class DiscriminatorModel:
         ##
 
         # Access input_frames_train
-      
-        g_feed_dict = {generator.input_frames_train: input_frames,
-                       generator.gt_frames_train: gt_output_frames}
+        generator.define_graph()
+        g_feed_dict = {generator.input_frames_train,
+                       generator.gt_frames_train}
 
         g_scale_preds = self.sess.run(generator.scale_preds_train, feed_dict=g_feed_dict)
 

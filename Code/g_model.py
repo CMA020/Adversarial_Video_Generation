@@ -196,9 +196,7 @@ class GeneratorModel:
                                                  self.d_scale_preds)
                 self.global_step = tf.Variable(0, trainable=False)
                 self.optimizer = tf.optimizers.Adam(learning_rate=c.LRATE_G, name='optimizer')
-                self.train_op = self.optimizer.minimize(self.global_loss,
-                                                        global_step=self.global_step,
-                                                        name='train_op')
+                self.train_op = self.optimizer.minimize(self.global_loss,var_list=[self.global_step])
 
                 # train loss summary
                 loss_summary = tf.scalar_summary('train_loss_G', self.global_loss)
