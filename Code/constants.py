@@ -72,7 +72,8 @@ def set_test_dir(directory):
 DATA_DIR = get_dir('../Data/')
 # directory of unprocessed training frames
 #TRAIN_DIR = os.path.join(DATA_DIR, 'Ms_Pacman/Train/')
-# TRAIN_DIR = '~/Adversarial_Video_Generation/Train'
+TRAIN_DIR = os.path.expanduser('~/Adversarial_Video_Generation/Data/Train')
+# #
 # directory of unprocessed test frames
 TEST_DIR =os.path.expanduser('~/Adversarial_Video_Generation/Data/Test')
 # Directory of processed training clips.
