@@ -44,7 +44,7 @@ class DiscriminatorModel:
         self.scale_fc_layer_sizes = scale_fc_layer_sizes
         self.num_scale_nets = len(scale_conv_layer_fms)
 
-        #self.define_graph()
+        self.define_graph()
 
     # noinspection PyAttributeOutsideInit
     def define_graph(self):
@@ -88,8 +88,9 @@ class DiscriminatorModel:
                 self.global_step = tf.Variable(0, trainable=False, name='global_step')
                 self.optimizer = tf.optimizers.SGD(c.LRATE_D, name='optimizer')
                 self.train_op = self.optimizer.minimize(self.global_loss,
-                                                        global_step=self.global_step,
-                                                        name='train_op')
+                                                        var_list=[self.global_step],
+                                                        tape=tf.GradientTape()
+                                                        )
 
                 # add summaries to visualize in TensorBoard
                 loss_summary = tf.scalar_summary('loss_D', self.global_loss)

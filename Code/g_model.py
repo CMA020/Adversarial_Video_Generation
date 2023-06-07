@@ -48,7 +48,7 @@ class GeneratorModel:
         self.scale_kernel_sizes = scale_kernel_sizes
         self.num_scale_nets = len(scale_layer_fms)
 
-        #self.define_graph()
+        self.define_graph()
 
     # noinspection PyAttributeOutsideInit
     def define_graph(self):
